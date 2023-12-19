@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +60,11 @@ public class UserController {
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable Integer id){
         userService.deleteUser(id);
         return new ResponseEntity<>(new ApiResponse("User deleted Successfully",true),HttpStatus.OK);
+    }
+
+    @GetMapping("/current-user-logged-in")
+    public String getLoggedInUser(Principal principal){
+        return principal.getName();
     }
 
 }
