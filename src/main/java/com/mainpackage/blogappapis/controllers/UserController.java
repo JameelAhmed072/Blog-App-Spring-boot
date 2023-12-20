@@ -16,37 +16,25 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class UserController {
-
-
     @Autowired
     private UserService userService;
-
-
     @PostMapping("/createUser")
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto){
-
         UserDto userCreated = userService.createUser(userDto);
-
         return new ResponseEntity<>(userCreated, HttpStatus.CREATED);
-
     }
     @GetMapping("/users")
     public ResponseEntity<List<UserDto>> allUser(){
-
         List<UserDto> allUsers = userService.getAllUsers();
-
         return ResponseEntity.ok(allUsers);
-
     }
     @GetMapping("/user/{id}")
     public ResponseEntity<UserDto> getSingleUser(@PathVariable Integer id){
-
         UserDto allUsers = userService.getUserById(id);
         return ResponseEntity.ok(allUsers);
     }
     @PutMapping("/user/{id}")
     public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable Integer id){
-
         UserDto updatedUser = userService.updateUser(userDto,id);
         return ResponseEntity.ok(updatedUser);
     }
