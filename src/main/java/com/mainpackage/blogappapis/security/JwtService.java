@@ -10,28 +10,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
 public class JwtService {
     public static final String SECRET = "357638792F423F4428472B4B6250655368566D597133743677397A2443264629";
-
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
-
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
@@ -40,25 +34,26 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
-
-
-
-    public String GenerateToken(String username){
+    public String GenerateToken(UserDetails userDetails){
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        List<String> roles = new ArrayList<>();
+
+        userDetails.getAuthorities().forEach(authority -> {
+            String authorityName =authority.getAuthority();
+            if (authorityName.startsWith("ROLE_")){
+                roles.add(authorityName.substring(5));
+            }
+        });
+        claims.put("ROLES",roles);
+        return createToken(claims, userDetails.getUsername());
     }
-
-
-
     private String createToken(Map<String, Object> claims, String username) {
 
         return Jwts.builder()
@@ -68,7 +63,6 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis()+10000*60*60*10))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
-
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET);
         return Keys.hmacShaKeyFor(keyBytes);

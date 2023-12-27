@@ -10,11 +10,8 @@ import lombok.*;
 @Setter
 @Builder
 public class PermissionDto {
-
     private Long id;
-
     private String name;
-
     private boolean status;
 
 }

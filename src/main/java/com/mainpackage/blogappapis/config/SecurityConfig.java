@@ -24,16 +24,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
     ///    ========           reference for Spring security is taken from this website   https://medium.com/spring-boot/spring-boot-3-spring-security-6-jwt-authentication-authorization-98702d6313a5
-
     @Autowired
     JwtAuthFilter jwtAuthFilter;
-    @Bean
+    @Bean   //  authentication
     public UserDetailsService userDetailsService() {
         return new UserDetailsServiceImpl();
     }
-    @Bean
+    @Bean   // authorization
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(a -> a.disable())
                 .authorizeHttpRequests(b -> b.requestMatchers("/api/login").permitAll())
@@ -42,21 +40,17 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
-
     }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
